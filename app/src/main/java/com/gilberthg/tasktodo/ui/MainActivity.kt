@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.gilberthg.tasktodo.R
 import com.gilberthg.tasktodo.db.task.Task
 import com.gilberthg.tasktodo.ui.utility.Commons
+import com.gilberthg.tasktodo.ui.utility.ConfirmDialog
 import com.gilberthg.tasktodo.ui.utility.FormDialog
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.task_fragment.view.*
@@ -35,9 +36,9 @@ class MainActivity : AppCompatActivity() {
             val options = resources.getStringArray(R.array.option_item)
             Commons.showSelector(this, "Choose Action", options){_, i->
                 when(i){
-                    1 -> showDetailDialog(task)
-                    2 -> showUpdateDialog(task)
-                    3 -> showDeleteDialog(task)
+                    0 -> showDetailDialog(task)
+                    1 -> showUpdateDialog(task)
+                    2 -> showDeleteDialog(task)
                 }
             }
         }
@@ -93,7 +94,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showDeleteDialog(task: Task) {
+        val dialogTitle = "Delete"
+        val dialogMessage = "Are you sure want to delete this task?"
+        val toastMessage = "Data has been deleted successfully"
 
+        ConfirmDialog(this, dialogTitle, dialogMessage) {
+            taskViewModel.deleteTask(task)
+            Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show()
+        }.show()
     }
 
     private fun showUpdateDialog(task: Task) {
@@ -150,7 +158,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showDetailDialog(task: Task) {
+        val title = "Title: ${task.title}"
+        val dueDate = "Due date: ${task.dueDate}, ${task.dueTime}"
+        val note = "Note: ${task.note}"
+        val dateCreated = "Date created: ${task.dateCreated}"
+        val dateUpdated = "Date updated: ${task.dateUpdated}"
+        val remindMe = "Reminder Active: ${task.remindMe}"
 
+        val strMessage = "$title\n$dueDate\n$note\n\n$dateCreated\n$dateUpdated\n$remindMe"
+
+        AlertDialog.Builder(this).setMessage(strMessage).setCancelable(false)
+            .setPositiveButton("OK") { dialogInterface, _ ->
+                dialogInterface.cancel()
+            }.create().show()
     }
 
     private fun showInsertDialog() {
