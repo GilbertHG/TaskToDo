@@ -126,9 +126,9 @@ class MainActivity : AppCompatActivity() {
 
         FormDialog(this, dialogTitle, view){
             val title = view.input_title.text.toString().trim()
-            val note = view.input_detail_task.text.toString().trim()
+            val note = view.input_detail_task.text.toString()
             val date = view.input_due_date.text.toString().trim()
-            val time = view.input_time.toString().trim()
+            val time = view.input_time.text.toString().trim()
 
             val dateCreated = task.dateCreated
             val remindMe = view.input_remind_me.isChecked
@@ -192,7 +192,7 @@ class MainActivity : AppCompatActivity() {
 
         FormDialog(this,dialogTitle,view){
             val title = view.input_title.text.toString().trim()
-            val note = view.input_detail_task.text.toString().trim()
+            val note = view.input_detail_task.text.toString()
             val date = view.input_due_date.text.toString().trim()
             val time = view.input_time.text.toString().trim()
 
@@ -225,6 +225,7 @@ class MainActivity : AppCompatActivity() {
             }
         }.show()
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater = menuInflater
