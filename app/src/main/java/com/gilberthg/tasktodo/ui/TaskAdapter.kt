@@ -8,7 +8,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.gilberthg.tasktodo.R
 import com.gilberthg.tasktodo.db.task.Task
+import com.gilberthg.tasktodo.ui.utility.Commons
 import kotlinx.android.synthetic.main.item_task.view.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 class TaskAdapter(private val context: Context?,private val listener:(Task,Int)->Unit):RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
     private var taskList = listOf<Task>()
@@ -32,12 +35,22 @@ class TaskAdapter(private val context: Context?,private val listener:(Task,Int)-
 
     class TaskViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         fun bindItem(task: Task, listener: (Task, Int) -> Unit){
-            val date = if(task.dateUpdated != task.dateCreated) "Updated at ${task.dateUpdated}" else "Created at ${task.dateCreated}"
-            val dueDate = "Due ${task.dueDate},${task.dueTime}"
+            val parsedDateCreated = SimpleDateFormat("dd/MM/yy", Locale.US).parse(task.dateCreated) as Date
+            val dateCreated = Commons.formatDate(parsedDateCreated, "dd MMM yyyy")
+
+            val parsedDateUpdated = SimpleDateFormat("dd/MM/yy", Locale.US).parse(task.dateCreated) as Date
+            val dateUpdated = Commons.formatDate(parsedDateUpdated, "dd MMM yyyy")
+
+            val date = if (task.dateUpdated != task.dateCreated) "Updated at $dateUpdated" else "Created at $dateCreated"
+
+            val parsedDate = SimpleDateFormat("dd/MM/yy", Locale.US).parse(task.dueDate) as Date
+            val dueDate = Commons.formatDate(parsedDate, "dd MMM yyyy")
+
+            val dueDateTime = "Due ${dueDate}, ${task.dueTime}"
 
             itemView.tv_title.text = task.title
             itemView.tv_detail.text = task.note
-            itemView.tv_due_date.text = dueDate
+            itemView.tv_due_date.text = dueDateTime 
             itemView.tv_created_date.text = date
 
             itemView.setOnClickListener{

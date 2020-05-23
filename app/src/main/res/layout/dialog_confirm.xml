@@ -32,7 +32,10 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/tv_dialog_msg"
         android:layout_alignParentLeft="true"
-        android:text="No"/>
+        android:text="No"
+        style="@style/Button"
+        android:background="@color/divider"
+        android:textColor="@color/primary_text"/>
 
     <Button
         android:id="@+id/btn_yes"
@@ -41,5 +44,5 @@
         android:layout_below="@+id/tv_dialog_msg"
         android:layout_alignParentRight="true"
         android:text="Yes"
-        android:background="@color/accent"/>
+        style="@style/Button"/>
 </RelativeLayout>

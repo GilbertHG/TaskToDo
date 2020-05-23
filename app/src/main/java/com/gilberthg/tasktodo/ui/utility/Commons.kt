@@ -68,4 +68,8 @@ object Commons {
             onClick(dialog, which)
         }.show()
     }
+
+    fun formatDate(date: Date, format: String): String{
+        return date.toString(format)
+    }
 }

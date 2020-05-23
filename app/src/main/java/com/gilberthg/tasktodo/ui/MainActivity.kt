@@ -118,6 +118,7 @@ class MainActivity : AppCompatActivity() {
         view.input_detail_task.setText(task.note)
         view.input_due_date.setText(task.dueDate)
         view.input_time.setText(task.dueTime)
+        view.input_remind_me.isChecked = task.remindMe
 
         val dialogTitle = "Edit Task"
         val toastMessage = "Task has been updated successfully"
@@ -130,7 +131,7 @@ class MainActivity : AppCompatActivity() {
             val time = view.input_time.toString().trim()
 
             val dateCreated = task.dateCreated
-            val remindMe = true
+            val remindMe = view.input_remind_me.isChecked
 
             if (title == "" || date == "" || time == "") {
                 AlertDialog.Builder(this).setMessage(failAlertMessage).setCancelable(false)
@@ -139,9 +140,10 @@ class MainActivity : AppCompatActivity() {
                     }.create().show()
             }else{
                 val parsedDate = SimpleDateFormat("dd/MM/yy", Locale.US).parse(date) as Date
-                val dueDate = parsedDate.toString("dd MMM yyyy")
+                val dueDate = Commons.formatDate(parsedDate, "dd/MM/yy")
 
-                val dateUpdated = Commons.getCurrentDateTime().toString("dd MMM yyyy")
+                val currentDate = Commons.getCurrentDateTime()
+                val dateUpdated =Commons.formatDate(currentDate, "dd/MM/yy HH:mm:ss")
 
                 task.title = title
                 task.note = note
@@ -163,7 +165,8 @@ class MainActivity : AppCompatActivity() {
         val note = "Note: ${task.note}"
         val dateCreated = "Date created: ${task.dateCreated}"
         val dateUpdated = "Date updated: ${task.dateUpdated}"
-        val remindMe = "Reminder Active: ${task.remindMe}"
+        val strReminder = if(task.remindMe) "Enabled" else "Disabled"
+        val remindMe = "Reminder: $strReminder"
 
         val strMessage = "$title\n$dueDate\n$note\n\n$dateCreated\n$dateUpdated\n$remindMe"
 
@@ -193,7 +196,7 @@ class MainActivity : AppCompatActivity() {
             val date = view.input_due_date.text.toString().trim()
             val time = view.input_time.text.toString().trim()
 
-            val remindMe = true
+            val remindMe = view.input_remind_me.isChecked
 
             if(title == "" || date == "" || time == ""){
                 AlertDialog.Builder(this).setMessage(failAlertMessage).setCancelable(false)
@@ -202,9 +205,10 @@ class MainActivity : AppCompatActivity() {
                     }.create().show()
             }else{
                 val parsedDate = SimpleDateFormat("dd/MM/yy", Locale.US).parse(date) as Date
-                val dueDate = parsedDate.toString("dd MMM yyy")
+                val dueDate = Commons.formatDate(parsedDate, "dd/MM/yy")
 
-                val dateCreated = Commons.getCurrentDateTime().toString("dd MMM yyyy")
+                val currentDate = Commons.getCurrentDateTime()
+                val dateCreated =Commons.formatDate(currentDate, "dd/MM/yy HH:mm:ss")
 
                 val task = Task(
                     title = title,
@@ -220,11 +224,6 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show()
             }
         }.show()
-    }
-
-    fun Date.toString(format: String, locale: Locale = Locale.getDefault()): String {
-        val formatter = SimpleDateFormat(format, locale)
-        return formatter.format(this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
