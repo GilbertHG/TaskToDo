@@ -97,7 +97,56 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showUpdateDialog(task: Task) {
+        val view = LayoutInflater.from(this).inflate(R.layout.task_fragment,null)
+        view.input_due_date.setOnClickListener {
+            Commons.showDatePickerDialog(this, view.input_due_date)
+        }
 
+        view.input_time.setOnClickListener {
+            Commons.showTimePickerDialog(this, view.input_time)
+        }
+
+        view.input_title.setText(task.title)
+        view.input_detail_task.setText(task.note)
+        view.input_due_date.setText(task.dueDate)
+        view.input_time.setText(task.dueTime)
+
+        val dialogTitle = "Edit Task"
+        val toastMessage = "Task has been updated successfully"
+        val failAlertMessage = "Please fill all the required fields"
+
+        FormDialog(this, dialogTitle, view){
+            val title = view.input_title.text.toString().trim()
+            val note = view.input_detail_task.text.toString().trim()
+            val date = view.input_due_date.text.toString().trim()
+            val time = view.input_time.toString().trim()
+
+            val dateCreated = task.dateCreated
+            val remindMe = true
+
+            if (title == "" || date == "" || time == "") {
+                AlertDialog.Builder(this).setMessage(failAlertMessage).setCancelable(false)
+                    .setPositiveButton("OK") { dialogInterface, _ ->
+                        dialogInterface.cancel()
+                    }.create().show()
+            }else{
+                val parsedDate = SimpleDateFormat("dd/MM/yy", Locale.US).parse(date) as Date
+                val dueDate = parsedDate.toString("dd MMM yyyy")
+
+                val dateUpdated = Commons.getCurrentDateTime().toString("dd MMM yyyy")
+
+                task.title = title
+                task.note = note
+                task.dateCreated = dateCreated
+                task.dateUpdated = dateUpdated
+                task.dueDate = dueDate
+                task.dueTime = time
+                task.remindMe = remindMe
+
+                taskViewModel.updateTask(task)
+                Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show()
+            }
+        }.show()
     }
 
     private fun showDetailDialog(task: Task) {
