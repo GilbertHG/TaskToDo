@@ -72,4 +72,9 @@ object Commons {
     fun formatDate(date: Date, format: String): String{
         return date.toString(format)
     }
+
+    fun convertStringToDate(strPattern: String, strDate: String): Date {
+        return SimpleDateFormat(strPattern, Locale.US).parse(strDate) as Date
+    }
+
 }

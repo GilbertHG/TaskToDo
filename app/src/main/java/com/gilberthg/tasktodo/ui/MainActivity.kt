@@ -1,11 +1,15 @@
 package com.gilberthg.tasktodo.ui
 
 import android.app.AlertDialog
+import android.app.SearchManager
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import android.widget.SearchView
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -15,6 +19,7 @@ import com.gilberthg.tasktodo.db.task.Task
 import com.gilberthg.tasktodo.ui.utility.Commons
 import com.gilberthg.tasktodo.ui.utility.ConfirmDialog
 import com.gilberthg.tasktodo.ui.utility.FormDialog
+import com.gilberthg.tasktodo.ui.utility.NotifyAlarm
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.task_fragment.view.*
 import java.text.SimpleDateFormat
@@ -22,9 +27,13 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
+    companion object{
+        var isSortByDateCreated = true
+    }
     private lateinit var taskViewModel: TaskViewModel
     private lateinit var taskAdapter: TaskAdapter
-    private val taskList: ArrayList<Task> = ArrayList<Task>()
+    private lateinit var notifyAlarm: NotifyAlarm
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -32,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         val layoutManager = LinearLayoutManager(this)
         rv.layoutManager = layoutManager
 
-        taskAdapter = TaskAdapter(this){task, _ ->
+        taskAdapter = TaskAdapter(){task, _ ->
             val options = resources.getStringArray(R.array.option_item)
             Commons.showSelector(this, "Choose Action", options){_, i->
                 when(i){
@@ -53,6 +62,8 @@ class MainActivity : AppCompatActivity() {
         button_add.setOnClickListener{
             showInsertDialog()
         }
+
+        notifyAlarm = NotifyAlarm()
     }
 
     override fun onResume() {
@@ -60,18 +71,10 @@ class MainActivity : AppCompatActivity() {
         observeData()
     }
 
-    private fun observeData(sortby: String = "dateCreated", keyword: String? = "") {
+    private fun observeData() {
         taskViewModel.getTasks()?.observe(this, Observer {
-            taskList.clear()
-            setProgressbarVisibility(false)
-
-            if(it.isEmpty()) setEmptyTextVisibility(true)
-            else {
-                taskList.addAll(it)
-                setEmptyTextVisibility(false)
-            }
-
             taskAdapter.setTaskList(it)
+            setProgressbarVisibility(false)
         })
 
     }
@@ -86,9 +89,9 @@ class MainActivity : AppCompatActivity() {
         else progressbar.visibility = View.INVISIBLE
     }
 
-    private fun refreshData(sortby: String = "dateCreated", keyword: String? = "") {
+    private fun refreshData() {
         setProgressbarVisibility(true)
-        observeData(sortby, keyword)
+        observeData()
         swipe_refresh_layout.isRefreshing = false
         setProgressbarVisibility(false)
     }
@@ -132,6 +135,7 @@ class MainActivity : AppCompatActivity() {
 
             val dateCreated = task.dateCreated
             val remindMe = view.input_remind_me.isChecked
+            val prevDueTime = task.dueTime
 
             if (title == "" || date == "" || time == "") {
                 AlertDialog.Builder(this).setMessage(failAlertMessage).setCancelable(false)
@@ -139,7 +143,7 @@ class MainActivity : AppCompatActivity() {
                         dialogInterface.cancel()
                     }.create().show()
             }else{
-                val parsedDate = SimpleDateFormat("dd/MM/yy", Locale.US).parse(date) as Date
+                val parsedDate = Commons.convertStringToDate("dd/MM/yy",date)
                 val dueDate = Commons.formatDate(parsedDate, "dd/MM/yy")
 
                 val currentDate = Commons.getCurrentDateTime()
@@ -154,6 +158,9 @@ class MainActivity : AppCompatActivity() {
                 task.remindMe = remindMe
 
                 taskViewModel.updateTask(task)
+                if (remindMe && prevDueTime!=time) {
+                    notifyAlarm.setReminderAlarm(this, dueDate, time,"$title is due in 1 hour")
+                }
                 Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show()
             }
         }.show()
@@ -204,7 +211,7 @@ class MainActivity : AppCompatActivity() {
                         dialogInterface.cancel()
                     }.create().show()
             }else{
-                val parsedDate = SimpleDateFormat("dd/MM/yy", Locale.US).parse(date) as Date
+                val parsedDate = Commons.convertStringToDate("dd/MM/yy",date)
                 val dueDate = Commons.formatDate(parsedDate, "dd/MM/yy")
 
                 val currentDate = Commons.getCurrentDateTime()
@@ -221,15 +228,52 @@ class MainActivity : AppCompatActivity() {
                 )
 
                 taskViewModel.insertTask(task)
+                if (remindMe) {
+                    notifyAlarm.setReminderAlarm(this, dueDate, time,"$title is due in 1 hour")
+                }
                 Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show()
             }
         }.show()
     }
 
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.menu_main, menu)
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        val searchView = (menu.findItem(R.id.search)).actionView as androidx.appcompat.widget.SearchView
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName))
+        searchView.queryHint = "Search tasks"
+        searchView.setOnQueryTextListener(object: androidx.appcompat.widget.SearchView.OnQueryTextListener{
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                searchView.clearFocus()
+                taskAdapter.filter.filter(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                taskAdapter.filter.filter(newText)
+                return false
+            }
+        })
+
         return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.sort -> true
+            R.id.sort_by_date_created -> {
+                isSortByDateCreated = true
+                refreshData()
+                true
+            }
+            R.id.sort_by_due_date -> {
+                isSortByDateCreated = false
+                refreshData()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 }
