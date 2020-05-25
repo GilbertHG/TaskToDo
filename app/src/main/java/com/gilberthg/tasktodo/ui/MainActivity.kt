@@ -171,11 +171,11 @@ class MainActivity : AppCompatActivity() {
         val dueDate = "Due date: ${task.dueDate}, ${task.dueTime}"
         val note = "Note: ${task.note}"
         val dateCreated = "Date created: ${task.dateCreated}"
-        val dateUpdated = "Date updated: ${task.dateUpdated}"
+        val dateUpdated = "Last updated: ${task.dateUpdated}"
         val strReminder = if(task.remindMe) "Enabled" else "Disabled"
         val remindMe = "Reminder: $strReminder"
 
-        val strMessage = "$title\n$dueDate\n$note\n\n$dateCreated\n$dateUpdated\n$remindMe"
+        val strMessage = "$title\n$note\n\n$dueDate\n$dateCreated\n$dateUpdated\n$remindMe"
 
         AlertDialog.Builder(this).setMessage(strMessage).setCancelable(false)
             .setPositiveButton("OK") { dialogInterface, _ ->

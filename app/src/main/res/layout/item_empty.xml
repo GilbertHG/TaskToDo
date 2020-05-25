@@ -9,5 +9,6 @@
         android:id="@+id/tv_empty"
         tools:text="empty data"
         android:textColor="@color/secondary_text"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true"
+        android:fontFamily="sans-serif-medium"/>
 </RelativeLayout>
