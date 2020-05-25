@@ -23,6 +23,7 @@
         android:textColor="@color/design_default_color_surface"
         android:background="@color/accent"
         android:paddingLeft="16dp"
+        android:paddingRight="16dp"
         android:paddingTop="2dp"
         android:paddingBottom="2dp"
         android:fontFamily="sans-serif-medium"/>
