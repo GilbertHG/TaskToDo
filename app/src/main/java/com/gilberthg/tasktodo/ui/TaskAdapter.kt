@@ -120,7 +120,7 @@ class TaskAdapter(private val listener: (Task, Int) -> Unit): RecyclerView.Adapt
 
     class EmptyViewHolder (itemView: View): RecyclerView.ViewHolder(itemView){
         fun bindItem(){
-            itemView.tv_empty.text = "No data found"
+        itemView.tv_empty.text = "No task found!"
         }
     }
 }

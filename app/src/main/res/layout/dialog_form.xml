@@ -17,8 +17,7 @@
         tools:text="Title"
         android:textColor="@color/primary_text"
         android:textSize="18sp"
-        android:textStyle="bold"
-        android:fontFamily="sans-serif-medium"/>
+        android:textStyle="bold" />
 
     <ScrollView
         android:id="@+id/form_container"
@@ -37,8 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:text="Save"
-            android:fontFamily="sans-serif-medium"/>
+            android:text="Save" />
 
         <Button
             android:id="@+id/btn_cancel"
@@ -47,8 +45,7 @@
             android:layout_height="wrap_content"
             android:background="@color/divider"
             android:text="Cancel"
-            android:textColor="@color/primary_text"
-            android:fontFamily="sans-serif-medium"/>
+            android:textColor="@color/primary_text" />
     </RelativeLayout>
 
 </LinearLayout>
